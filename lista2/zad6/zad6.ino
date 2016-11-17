@@ -2,6 +2,17 @@
 #define diodPin 7
 #define beepPin 9
 
+
+/*
+ponizej 3*kropka czasu nacisniecie mamy kropke
+powyżej 3*kropka czasu nacisniecia mamy kreske
+
+ponizej kropka czasu puszczenia mamy el. znaku
+powyżej kropka a poniżej 3*kropka czasu puszczenia elementy znaku są zamieniane na znak
+powyżej 3*kropka a poniżej 7*kropka czasu puszczenia znaki są zamieniane na slowo
+powyżej 7*kropka czasu puszczenia automatycznie wypisywane jest slowo
+*/
+
 int kropka = 400;
 
 int hold = 0;
