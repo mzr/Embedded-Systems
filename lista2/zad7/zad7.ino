@@ -38,8 +38,6 @@ void loop() {
             przyjete = ( przyjete + 1 ) % pojemnosc;
         }
                 
-        // tab[przyjete] = incomingByte;
-                
         doWyslania += a.length();
                 
         if(incomingByte == ckreska)
@@ -50,39 +48,15 @@ void loop() {
             Serial.println("spacja");
     }
         
-    if(/*przyjete > wyslane && */ mozna_nowy_wlaczyc && doWyslania > 0 ) { //tu bedzie problem jak sie zrobi modulo przyjete a wyslane nie
-        if(tab[wyslane] == ckropka) {
-            digitalWrite(diodPin,HIGH);
-            czas_swiecenia = kropka;
-            czas_czekania_po = kropka;
-            mozna_nowy_wlaczyc = 0;
-            time = millis();
-            swieci = 1;
-            tone(beepPin,540);
-        }
-        if(tab[wyslane] == ckreska) {
-            digitalWrite(diodPin,HIGH);
-            czas_swiecenia = 3 * kropka;
-            czas_czekania_po = kropka;
-            mozna_nowy_wlaczyc = 0;
-            swieci = 1;  
-            time = millis();
-            tone(beepPin,540);
-        }
-        if(tab[wyslane] == cspacja) {
-            czas_swiecenia = 0;
-            czas_czekania_po = 3 * kropka;
-            mozna_nowy_wlaczyc = 0;
-            swieci = 0;
-            time = millis();
-        }
-        if(tab[wyslane] == cslash) {
-            czas_swiecenia = 0;
-            czas_czekania_po = 4 * kropka;
-            mozna_nowy_wlaczyc = 0;
-            swieci = 0;
-            time = millis();
-        }
+    if(mozna_nowy_wlaczyc && doWyslania > 0 ) { 
+        if(tab[wyslane] == ckropka) 
+            znak(1);
+        if(tab[wyslane] == ckreska) 
+            znak(3);
+        if(tab[wyslane] == cspacja) 
+            blank(3);
+        if(tab[wyslane] == cslash) 
+            blank(4);
     }
         
     if( millis() - time >= czas_swiecenia && swieci  && !mozna_nowy_wlaczyc ) {
@@ -125,4 +99,22 @@ String letter_to_morse(int letter) {
     if(letter == 'y') return String("-.-- ");
     if(letter == 'z') return String("--.. ");
     if(letter == ' ') return String("/");
+}
+
+void znak(mult) {
+    digitalWrite(diodPin,HIGH);
+    czas_swiecenia = mult*kropka;
+    czas_czekania_po = kropka;
+    mozna_nowy_wlaczyc = 0;
+    time = millis();
+    swieci = 1;
+    tone(beepPin,540);        
+}
+
+void blank(mult) {
+    czas_swiecenia = 0;
+    czas_czekania_po = mult * kropka;
+    mozna_nowy_wlaczyc = 0;
+    swieci = 0;
+    time = millis();
 }
