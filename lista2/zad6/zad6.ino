@@ -2,20 +2,22 @@
 #define diodPin 7
 #define beepPin 9
 
-int kropka = 1000;
+int kropka = 400;
 
-int tolerancja = 10;
-
-int time_press;
 int hold = 0;
-int time_held;
-
-int time_release;
 int released = 0;
-int time_unheld;
 
-String el = String(""); 
-String znak = String("");
+int nacisniecie;
+int czas_nacisniecia;
+
+int parse_time;
+int parse;
+
+String el = String("");
+String slowo = String("");
+String output = String("");
+
+int slowo_gotowe = 0;
 
 void setup() {
     Serial.begin(9600);
@@ -29,48 +31,49 @@ void loop() {
     // on press
     if(sensorVal == 0 && hold == 0) {
         hold = 1;
-        time_press = millis();
-        
-        if(released == 1) {
-            time_unheld = millis() - time_release;
-
-            //to znaczy ze to co bylo to byl el znaku
-            if(time_unheld <= 2*kropka)
-                Serial.println("to element znaku");
-            // z tablicy el robimy litere
-            if(time_unheld > 2*kropka && time_unheld <= 5*kropka ) {
-                Serial.println("to literka");
-                znak = String(znak + morse_to_letter(el));
-                Serial.println(morse_to_letter(el));
-                el = String("");
-            }
-            if(time_unheld > 5*kropka) {
-                Serial.println("to slowo");
-                znak = String(znak + " ");
-                Serial.println(znak);
-                znak = String(""); 
-            }
-        }
         released = 0;
+        Serial.println("pressed");
+        nacisniecie = millis();
+        
+        if(slowo_gotowe) {
+            Serial.println(output);
+            output = String("");
+            slowo_gotowe = 0;
+        }
     }
   
     // on release
     if(sensorVal == 1 && hold == 1) {
         hold = 0;
-        time_held = millis() - time_press;  
         released = 1;
-        time_release = millis();
-   
-        //mamy kreske
-        if(time_held >= 3*kropka) {
-            Serial.println("mamy kreske");
-            el = String(el + "-");
-        }
-        // mamy kropke // w sumie mozna dac 3*kropka
-        if(time_held <= 2*kropka) {
-            Serial.println("mamy kropke");
-            el = String(el + ".");
-        } 
+        czas_nacisniecia = millis() - nacisniecie;
+        Serial.println(czas_nacisniecia);
+        el += kropka_czy_kreska(czas_nacisniecia);
+        
+        parse = millis();
+    }
+    
+    if(released) {
+       parse_time = millis() - parse;
+       
+       if(parse_time <= kropka) {
+          //nic bo sie dodaje do znakow na puszczeniu przycisku 
+       }
+       if(parse_time > kropka && parse_time <= 3*kropka) {
+           slowo += morse_to_letter(el);
+           el = String("");
+       }
+       if(parse_time > 3*kropka && parse_time <= 7*kropka) {
+           output += slowo;
+           slowo = String("");
+           int slowo_gotowe = 1;
+       }
+       if(parse_time > 7*kropka) {
+           Serial.println(output);
+            released = 0;   
+            output = String("");
+            slowo_gotowe = 0;
+       }
     }
 }
 
@@ -102,6 +105,17 @@ String morse_to_letter(String morse)
     if(morse.compareTo(String("-..-")) == 0 ) return String("x");
     if(morse.compareTo(String("-.--")) == 0 ) return String("y");
     if(morse.compareTo(String("--..")) == 0 ) return String("z");
+    
+    //chyba niepotrzebne
+    if(morse.compareTo(String("")) == 0 ) return String("");
 
+    // gdy sie nie dopasowalo tzn nie ma takiego znaku
     return String("!");
+}
+
+String kropka_czy_kreska(int time) {
+    if( time < 3*kropka )
+        return String(".");
+    if( time >= 3*kropka)
+        return String("-");
 }
