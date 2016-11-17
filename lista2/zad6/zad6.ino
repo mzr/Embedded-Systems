@@ -12,7 +12,6 @@ powyżej kropka a poniżej 3*kropka czasu puszczenia elementy znaku są zamienia
 powyżej 3*kropka a poniżej 7*kropka czasu puszczenia znaki są zamieniane na slowo
 powyżej 7*kropka czasu puszczenia automatycznie wypisywane jest slowo
 */
-
 int kropka = 400;
 
 int hold = 0;
@@ -51,6 +50,8 @@ void loop() {
             output = String("");
             slowo_gotowe = 0;
         }
+        tone(beepPin,540);
+        digitalWrite(diodPin,HIGH);
     }
   
     // on release
@@ -62,6 +63,9 @@ void loop() {
         el += kropka_czy_kreska(czas_nacisniecia);
         
         parse = millis();
+
+        noTone(beepPin);
+        digitalWrite(diodPin,LOW);
     }
     
     if(released) {
