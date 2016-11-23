@@ -12,7 +12,37 @@ powyżej kropka a poniżej 3*kropka czasu puszczenia elementy znaku są zamienia
 powyżej 3*kropka a poniżej 7*kropka czasu puszczenia znaki są zamieniane na slowo
 powyżej 7*kropka czasu puszczenia automatycznie wypisywane jest slowo
 */
-int kropka = 400;
+String tab[26] = 
+{
+String(".-"), //a
+String("-..."), //b
+String("-.-."), //c
+String("-.."), //d
+String("."), //e
+String("..-."), //f
+String("--."), //g
+String("...."), //h 
+String(".."), //i
+String(".---"), //j
+String("-.-"), //k
+String(".-.."), //l
+String("--"), //m
+String("-."), //n
+String("---"), //o
+String(".--."), //p
+String("--.-"), //q
+String(".-."), //r
+String("..."), //s
+String("-"), //t
+String("..-"), //u
+String("...-"), //v
+String(".--"), //w
+String("-..-"), //x
+String("-.--"), //y
+String("--..") //z
+};
+
+int kropka = 200;
 
 int hold = 0;
 int released = 0;
@@ -42,10 +72,11 @@ void loop() {
     if(sensorVal == 0 && hold == 0) {
         hold = 1;
         released = 0;
-        Serial.println("pressed");
+        //Serial.println("pressed");
         nacisniecie = millis();
         
         if(slowo_gotowe) {
+          Serial.print("slowo: ");
             Serial.println(output);
             output = String("");
             slowo_gotowe = 0;
@@ -59,7 +90,7 @@ void loop() {
         hold = 0;
         released = 1;
         czas_nacisniecia = millis() - nacisniecie;
-        Serial.println(czas_nacisniecia);
+        //Serial.println(czas_nacisniecia);
         el += kropka_czy_kreska(czas_nacisniecia);
         
         parse = millis();
@@ -76,6 +107,8 @@ void loop() {
        }
        if(parse_time > kropka && parse_time <= 3*kropka) {
            slowo += morse_to_letter(el);
+           if( el.length() > 0 )
+           Serial.println(morse_to_letter(el));
            el = String("");
        }
        if(parse_time > 3*kropka && parse_time <= 7*kropka) {
@@ -84,6 +117,7 @@ void loop() {
            int slowo_gotowe = 1;
        }
        if(parse_time > 7*kropka) {
+           Serial.print("slowo: ");
            Serial.println(output);
             released = 0;   
             output = String("");
@@ -94,32 +128,9 @@ void loop() {
 
 String morse_to_letter(String morse)
 {
-    if(morse.compareTo(String(".-")) == 0 ) return String("a");
-    if(morse.compareTo(String("-...")) == 0 ) return String("b");
-    if(morse.compareTo(String("-.-.")) == 0 ) return String("c");
-    if(morse.compareTo(String("-..")) == 0 ) return String("d");
-    if(morse.compareTo(String(".")) == 0 ) return String("e");
-    if(morse.compareTo(String("..-.")) == 0 ) return String("f");
-    if(morse.compareTo(String("--.")) == 0 ) return String("g");
-    if(morse.compareTo(String("....")) == 0 ) return String("h");
-    if(morse.compareTo(String("..")) == 0 ) return String("i");
-    if(morse.compareTo(String(".---")) == 0 ) return String("j");
-    if(morse.compareTo(String("-.-")) == 0 ) return String("k");
-    if(morse.compareTo(String(".-..")) == 0 ) return String("l");
-    if(morse.compareTo(String("--")) == 0 ) return String("m");
-    if(morse.compareTo(String("-.")) == 0 ) return String("n");
-    if(morse.compareTo(String("---")) == 0 ) return String("o");
-    if(morse.compareTo(String(".--.")) == 0 ) return String("p");
-    if(morse.compareTo(String("--.-")) == 0 ) return String("q");
-    if(morse.compareTo(String(".-.")) == 0 ) return String("r");
-    if(morse.compareTo(String("...")) == 0 ) return String("s");
-    if(morse.compareTo(String("-")) == 0 ) return String("t");
-    if(morse.compareTo(String("..-")) == 0 ) return String("u");
-    if(morse.compareTo(String("...-")) == 0 ) return String("v");
-    if(morse.compareTo(String(".--")) == 0 ) return String("w");
-    if(morse.compareTo(String("-..-")) == 0 ) return String("x");
-    if(morse.compareTo(String("-.--")) == 0 ) return String("y");
-    if(morse.compareTo(String("--..")) == 0 ) return String("z");
+    for(int i=0; i<26; i++)
+      if(morse.compareTo(tab[i]) == 0)
+        return String((char)('a' + i));
     
     //chyba niepotrzebne
     if(morse.compareTo(String("")) == 0 ) return String("");
