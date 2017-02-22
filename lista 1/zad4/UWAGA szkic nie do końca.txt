@@ -1,0 +1,5 @@
+we Fritzing'u nie ma tinkerkit sensor shield (to siê nak³ada na arduino),
+wiêc na rys da³em motor shield,
+poza tym nie ma sensora magnetycznego, wiêc da³em na rys akcelerometr,
+i jest jeden kabelek ³¹czony z trzech do inputu I0 na tinkerkit,
+ni tak jak tu OUT 6 ; poza tym te kabelki mog¹ byæ pojedyncze z tych 3 nie tak jak trzeba

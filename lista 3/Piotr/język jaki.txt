@@ -1,0 +1,2 @@
+to jest w³aœciwie C, zarz¹dzanie pamiêci¹ jest z C
+jedyne co z C++ to wygodniejsze wejœcie/wyjœcie

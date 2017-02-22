@@ -1,0 +1,192 @@
+//linie oznaczone /**/ na pocz¹tku maj¹ byæ w kodzie dla odbieraj¹cego arduino, te bez dla nadaj¹cego
+//ale czasem opisane w komentarzu jak a nie tym
+
+#define diodPin 13
+#define beepPin 9
+#define kropka1 5 //2ms to juz za szybko
+#define button 5 
+
+byte ckropka = '.';
+byte ckreska = '-';
+byte cspacja = ' ';
+byte cslash  = '/';
+
+#define pojemnosc 300 //przy 500 i 73% zu¿ycia pamiêci na globalnych siê wywala, co za beznadzieja...
+byte tab[pojemnosc]; //100 to zdecydowanie za ma³o nad³u¿sze zdanie - i tak bardzo d³ugie nie wejdzie
+int przyjete = 0;
+int wyslane = 0;
+
+byte mozna_nowy_wlaczyc = 1;
+byte swieci = 0;
+
+int czas_czekania_po;
+int czas_swiecenia;
+long timenow;
+
+int doWyslania = 0;
+
+
+
+//nie ma czegoœ takiego jak spacja miêdzy zdaniami, s¹ symbole kropki itp.
+
+String letter_to_morse(int letter) { //spacje nakoñcu zapisu ka¿dego znaku s¹ wa¿ne
+    if(letter == 'a') return String(".- ");
+    if(letter == 'b') return String("-... ");
+    if(letter == 'c') return String("-.-. ");
+    if(letter == 'd') return String("-.. ");
+    if(letter == 'e') return String(". ");
+    if(letter == 'f') return String("..-. ");
+    if(letter == 'g') return String("--. ");
+    if(letter == 'h') return String(".... ");
+    if(letter == 'i') return String(".. ");
+    if(letter == 'j') return String(".--- ");
+    if(letter == 'k') return String("-.- ");
+    if(letter == 'l') return String(".-.. ");
+    if(letter == 'm') return String("-- ");
+    if(letter == 'n') return String("-. ");
+    if(letter == 'o') return String("--- ");
+    if(letter == 'p') return String(".--. ");
+    if(letter == 'q') return String("--.- ");
+    if(letter == 'r') return String(".-. ");
+    if(letter == 's') return String("... ");
+    if(letter == 't') return String("- ");
+    if(letter == 'u') return String("..- ");
+    if(letter == 'v') return String("...- ");
+    if(letter == 'w') return String(".-- ");
+    if(letter == 'x') return String("-..- ");
+    if(letter == 'y') return String("-.-- ");
+    if(letter == 'z') return String("--.. ");
+    if(letter == ' ') return String("/");
+    if(letter == '1') return String(".---- ");
+    if(letter == '2') return String("..--- ");
+    if(letter == '3') return String("...-- ");
+    if(letter == '4') return String("....- ");
+    if(letter == '5') return String("..... ");
+    if(letter == '6') return String("-.... ");
+    if(letter == '7') return String("--... ");
+    if(letter == '8') return String("---.. ");
+    if(letter == '9') return String("----. ");
+    if(letter == '0') return String("----- ");
+    if(letter == '.') return String(".-.-.- ");
+    if(letter == ',') return String("--..-- ");
+    if(letter == '\'') return String(".----. ");
+    if(letter == '"') return String(".-..-. ");
+    if(letter == '_') return String("..--.- ");
+    if(letter == ':') return String("---... ");
+    if(letter == ';') return String("-.-.-. ");
+    if(letter == '?') return String("..--.. ");
+    if(letter == '!') return String("-.-.-- "); // lub --..--
+    if(letter == '-') return String("-....- ");
+    if(letter == '+') return String(".-.-. ");
+    if(letter == '/') return String("-..-. ");
+    if(letter == '(') return String("-.--. ");
+    if(letter == ')') return String("-.--.- ");
+    if(letter == '=') return String("-...- ");
+    if(letter == '@') return String(".--.-. ");
+    if(letter == '¹') return String(".-.- ");
+    if(letter == 'æ') return String("-.-.. ");
+    if(letter == 'ê') return String("..-.. ");
+    if(letter == '³') return String(".-..- ");
+    if(letter == 'ñ') return String("--.-- ");
+    if(letter == 'ó') return String("---. ");
+    if(letter == 'œ') return String("...-... ");
+    if(letter == '¿') return String("--..-. ");
+    if(letter == 'Ÿ') return String("--..- ");
+    return String("");
+}
+
+void znak(int mult) {
+    digitalWrite(diodPin,HIGH);
+    czas_swiecenia = mult*kropka1;
+    czas_czekania_po = kropka1;
+    mozna_nowy_wlaczyc = 0;
+    timenow = millis();
+    swieci = 1;
+    tone(beepPin,540);        
+}
+
+void blank(int mult) {
+    czas_swiecenia = 0;
+    czas_czekania_po = mult * kropka1;
+    mozna_nowy_wlaczyc = 0;
+    swieci = 0;
+    timenow = millis();
+}
+
+
+
+
+/**/ //SETUP W ODBIERAJ¥CYM 1-3 LINIE, w nadaj¹cym 1'sz¹ i 4-6 tylko!
+void setup() {
+    Serial.begin(9600);   
+    //pinMode(pmin, INPUT_PULLUP);
+    //pinMode(pmax, INPUT_PULLUP);
+    pinMode(button, INPUT_PULLUP);
+    pinMode(diodPin,OUTPUT);
+    pinMode(beepPin,OUTPUT);
+}
+
+/**/ //W LOOP TE¯ TE Z /**/ W ODBIERAJ¥CYM
+void loop() {
+    if (Serial.available() > 0) {
+        int incomingByte = Serial.read();
+        //Serial.print(incomingByte);
+        String a = letter_to_morse(incomingByte);
+
+        for(int i=0; i<a.length(); i++) { //dokleja przetworzony na Morse'a znak
+            tab[przyjete] = a[i];
+            przyjete = ( przyjete + 1 ) % pojemnosc;
+        }
+                
+        doWyslania += a.length();
+                
+        if(incomingByte == ckreska);
+            //Serial.println("kreska");
+        if(incomingByte == ckropka); 
+            //Serial.println("koniec zdania");
+        if(incomingByte == cspacja);
+            //Serial.println("spacja");
+    }
+        
+    if(mozna_nowy_wlaczyc && doWyslania > 0 ) { 
+        if(tab[wyslane] == ckropka) 
+            znak(1);
+        if(tab[wyslane] == ckreska) 
+            znak(3);
+        if(tab[wyslane] == cspacja) 
+            blank(2); //siê dodaje do domyœlnej jednokropkowej pauzy po ka¿dym
+        if(tab[wyslane] == cslash) 
+            blank(6);//siê dodaje do domyœlnej jednokropkowej pauzy po ka¿dym
+    }
+        
+    if( millis() - timenow >= czas_swiecenia && swieci  && !mozna_nowy_wlaczyc ) {
+        digitalWrite(diodPin,LOW);
+        noTone(beepPin);
+        swieci = 0;
+    }
+    if( millis() - timenow >= czas_swiecenia + czas_czekania_po && !swieci && !mozna_nowy_wlaczyc) {
+        mozna_nowy_wlaczyc = 1;
+        wyslane = ( wyslane + 1 ) % pojemnosc; 
+        doWyslania--;
+    }
+
+    //pali diodê przez 3s i wtedy drugi ma nacisn¹æ pmax
+    //pmin trzeba przy zwyk³ym oœwietleniu a pmax przy zapalonej
+    //jak siê œwiat³o zmieni to kalibrowaæ jeszcze raz
+    //przy kalibracji uzna ze sie cos przeslalo pewnie, no ale trudno
+    //mo¿na by jeszcze dodaæ przycisk ignorowania albo w³¹cz/wy³¹cz
+    if (digitalRead(button) == LOW)
+    {
+      //Serial.println("but");
+      digitalWrite(diodPin,HIGH);
+      delay(500);
+      //!!! USUN¥Æ TO JAK NA DWA ARDUINO - tam siê da przycisn¹æ i nie przeœle siê 'prawy'
+      //prawy = analogRead(fotopin); //!!! USUN¥Æ TO JAK NA DWA ARDUINO - tam siê da przycisn¹æ i nie przeœle siê 'prawy'
+      delay(3000);
+      digitalWrite(diodPin,LOW);
+      delay(500);
+    }
+
+  
+
+}
